@@ -1,0 +1,17 @@
+Scroll with the arrow keys.
+
+Press pgup and pgdn to shift up and down the z-axis.
+
+Use the number keys to set the type of tile or object based on the edit mode.
+
+Press ~ to switch between editing tile types and objects.
+
+Press b to activate brush mode (edit tiles by scrolling).
+
+Press e to export the text version of the map.
+
+Press i to import the text of another map and edit that one.
+
+Press j to export the map as javascript code.
+
+Enjoy life and have fun!
