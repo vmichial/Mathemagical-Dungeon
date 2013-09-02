@@ -1,0 +1,13 @@
+{
+	"name": "Mathemagical-Dungeon",
+	"version": "0.0.1",
+	"dependencies": {
+		"cf-autoconfig": "*",
+		"express": "*"
+	},
+	"engines": {
+		"node": ">=0.8.0",
+		"npm": ">=1.0.0"
+	},
+	"ignoreNodeModules": "true"
+}

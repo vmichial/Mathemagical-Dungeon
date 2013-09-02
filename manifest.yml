@@ -1,0 +1,9 @@
+---
+applications:
+-  name: Mathemagical-Dungeon
+   command: node CF-Server.js
+   memory: 128M
+   instances: 1
+   host: none
+   domain: none
+   path: ./
