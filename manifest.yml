@@ -1,6 +1,6 @@
 ---
 applications:
--  name: Mathemagical-Dungeon
+-  name: Mathemagical Dungeon
    command: node CF-Server.js
    memory: 128M
    instances: 1
