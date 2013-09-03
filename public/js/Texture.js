@@ -33,6 +33,7 @@ var Texture=function(id, tileSize) { // 2 overloads
 	this.img=null;
 
 	this.size={ x: 0, y: 0 }; // Size of image
+	this.scale={ x: 1, y: 1 }; // scale to this size [1=normal]
 	this.mid={ x: undefined, y: undefined }; // Mid point of the texture to center on when drawn
 
 	// Tile size [default: size of image]
@@ -60,8 +61,7 @@ var Texture=function(id, tileSize) { // 2 overloads
 	this._alt=0;             // < Alternate views [different angles]
 	this._altCount=0;        // < Count of alt views
 
-	this._angle=0;           // < Current angle
-
+	this._static=false;      // Static or animated texture
 	this._lastSheetPos={ u: 0, v: 0 };
 
 	this._stepped=0; // DEBUG: Help coders catch unecessary calls to step() before a draw()
@@ -72,15 +72,15 @@ var Texture=function(id, tileSize) { // 2 overloads
 			Public methods
 	*/
 	this.Texture=function(id, tileSize) { // Constructor; 1 overload
-		if(id==undefined) { // DEBUG
+		if(id==undefined) {
 			console.log('Texture() :: No ID given, not constructing'); // DEBUG
-			return;          // DEBUG
-		}                   // DEBUG
-		// DEBUG
+			return;
+		}
+
 		if(tileSize!=undefined) { // Texture(id, tileSize)
-			if(typeof tileSize!='object') throw (this.id+'": Texture(ctx, tileSize) tileSize must take an XY struct'); // DEBUG
-			if(typeof tileSize.x!='number') throw (this.id+'": Texture(ctx, tileSize) parameter "tileSize.x" must be a number; got a typeof('+tileSize.x+')=='+typeof tileSize.x); // DEBUG
-			if(typeof tileSize.y!='number') throw (this.id+'": Texture(ctx, tileSize) parameter "tileSize.y" must be a number; got a typeof('+tileSize.y+')=='+typeof tileSize.y); // DEBUG
+			if(typeof tileSize!='object') throw (this.id+': Texture(ctx, tileSize) tileSize must take an XY struct'); // DEBUG
+			if(typeof tileSize.x!='number') throw (this.id+': Texture(ctx, tileSize) parameter "tileSize.x" must be a number; got a typeof('+tileSize.x+')=='+typeof tileSize.x); // DEBUG
+			if(typeof tileSize.y!='number') throw (this.id+': Texture(ctx, tileSize) parameter "tileSize.y" must be a number; got a typeof('+tileSize.y+')=='+typeof tileSize.y); // DEBUG
 			//DEBUG
 			this.tileSize.x=tileSize.x;
 			this.tileSize.y=tileSize.y;
@@ -120,6 +120,8 @@ var Texture=function(id, tileSize) { // 2 overloads
 			this._alt=0;
 			this._altCount=Math.floor(this.size.y/this.tileSize.y);
 
+			this.static=false;
+
 			console.log('Texture('+this.id+') :: Loaded animated texture\n > Texture.pause=true'); // DEBUG
 		} else {
 			this._frame=0;
@@ -129,7 +131,7 @@ var Texture=function(id, tileSize) { // 2 overloads
 			this._alt=0;
 			this._altCount=1;
 
-			this.pause=true; // Dont even think about animating a static texture
+			this.static=true;
 
 			console.log('Texture('+this.id+') :: Loaded static texture'); // DEBUG
 		}
@@ -160,56 +162,18 @@ var Texture=function(id, tileSize) { // 2 overloads
 		return false;
 	}
 
-	this.getAng=function() {
-		return this._angle;
-	}
-	this.setAng=function(angle) {
-		if(typeof angle!='number') throw (this.id+': setAng(angle) parameter "angle" must be a number; got a typeof('+angle+')=='+typeof angle);
-
-		this._angle=angle;
-		this._alt=this._getAngleIndex(angle);
-	}
-
 	// Face the sprite in a direction
-	this.face=function(pos) { // 1 overload
-		// DEBUG: Check position
-		if(typeof pos=='number') { // DEBUG
-			if(typeof pos!='number') throw (this.id+': face(angle) parameter "angle" must be a number; got a typeof('+pos+')=='+typeof pos); // DEBUG
-		} else { // DEBUG
-			if(typeof pos!='object') throw (this.id+'": face(pos) pos must take an XY struct'); // DEBUG
-			if(typeof pos.x!='number') throw (this.id+'": face(pos) parameter "pos.x" must be a number; got a typeof('+pos.x+')=='+typeof pos.x); // DEBUG
-			if(typeof pos.y!='number') throw (this.id+'": face(pos) parameter "pos.y" must be a number; got a typeof('+pos.y+')=='+typeof pos.y); // DEBUG
-		} // DEBUG
+	this.face=function(angle) {
+		if(typeof angle!='number') throw (this.id+': face(θ) parameter "θ" must be a number; got a typeof('+pos+')=='+typeof pos); // DEBUG
 		// DEBUG
-		if(typeof pos=='number') { // face(angle)
-			this._angle=pos;
-			this._alt=this._getAngleIndex(pos);
-		} else { // face(x, y)
-			var destAng=0;
-			pos.x-=this.x;
-			pos.y-=this.y;
-
-			if(pos.x!=0||pos.y!=0) {
-				if(pos.y==0) {
-					destAng=Math.PI/2;
-					if(pos.x<0) destAng+=Math.PI;
-				} else {
-					destAng=Math.atan(pos.x/pos.y);
-					if(pos.y<0) destAng+=Math.PI;
-				}
-				destAng+=Math.PI*3/2; // Prevents negative values
-				destAng%=Math.PI*2;
-
-				this._angle=destAng;
-				this._alt=this._getAngleIndex(destAng);
-			}
-		}
+		this._alt=this._getAngleIndex(angle);
 		this._lastSheetPos=this._getSheetPos();
+		return angle;
 	}
 
 	// This steps in the animation & returns the number of steps taken
 	this.step=function() {
-		if(this.pause) return 0;
+		if(this.static||this.pause) return 0;
 
 		var step=false; // Whether to step in the animation
 		var updateCount=0;
@@ -246,19 +210,31 @@ var Texture=function(id, tileSize) { // 2 overloads
 		if(ctx==undefined) throw (this.id+': draw(ctx, pos) context not passed'); // DEBUG
 		if(this.id==null) throw (this.id+': sprite not initialized'); // DEBUG
 		// DEBUG: Check position
-		if(typeof pos!='object') throw (this.id+'": draw(ctx, pos) pos must take an XY struct'); // DEBUG
-		if(typeof pos.x!='number') throw (this.id+'": draw(ctx, pos) parameter "pos.x" must be a number; got a typeof('+pos.x+')=='+typeof pos.x); // DEBUG
-		if(typeof pos.y!='number') throw (this.id+'": draw(ctx, pos) parameter "pos.y" must be a number; got a typeof('+pos.y+')=='+typeof pos.y); // DEBUG
+		if(typeof pos!='object') throw (this.id+': draw(ctx, pos) pos must take an XY struct'); // DEBUG
+		if(typeof pos.x!='number') throw (this.id+': draw(ctx, pos) parameter "pos.x" must be a number; got a typeof('+pos.x+')=='+typeof pos.x); // DEBUG
+		if(typeof pos.y!='number') throw (this.id+': draw(ctx, pos) parameter "pos.y" must be a number; got a typeof('+pos.y+')=='+typeof pos.y); // DEBUG
 		// DEBUG
 		this._stepped=0; // DEBUG
 		// DEBUG
-		if(!this.hide) ctx.drawImage(
-			this.img, // Image source
-			this._lastSheetPos.u, this._lastSheetPos.v, // Offset in sprite sheet [which tile to draw]
-			this.tileSize.x, this.tileSize.y, // Tile size
-			Math.round(pos.x)-this.mid.x, Math.round(pos.y)-this.mid.y, // Position to place it
-			this.tileSize.x, this.tileSize.y // Size to scale it to
-		);
+		if(!this.hide) {
+			var mx=((pos.x)-this.mid.x*this.scale.x); // Maybe round pos?
+			var my=((pos.y)-this.mid.y*this.scale.y);
+			if(this.static) {
+				ctx.drawImage(
+					this.img, // Image source
+					mx, my,   // Position to place it
+					this.size.x*this.scale.x, this.size.y*this.scale.y // Size to scale it to
+				);
+			} else {
+				ctx.drawImage(
+					this.img, // Image source
+					this._lastSheetPos.u, this._lastSheetPos.v, // Offset in sprite sheet [which tile to draw]
+					this.tileSize.x, this.tileSize.y, // Tile size
+					mx, my,   // Position to place it
+					this.tileSize.x*this.scale.x, this.tileSize.y*this.scale.y // Size to scale it to
+				);
+			}
+		}
 	}
 
 
@@ -275,16 +251,16 @@ var Texture=function(id, tileSize) { // 2 overloads
 	}
 
 	// Return an index from the angle
+	// TODO: Eventually make a table of number of views to index
 	this._getAngleIndex=function(angle) {
-		if(typeof angle!='number') throw (this.id+': _getAngleIndex(angle) parameter "angle" must be a number; got a typeof('+angle+')=='+typeof angle); // DEBUG
-		// DEBUG: Catch out of bound angles
-		if(angle<0) throw (this.id+' call to _getAngleIndex('+angle+'), angle < 0'); // DEBUG
-		if(Math.PI*2<angle) throw (this.id+' call to _getAngleIndex('+angle+'), 2π < angle'); // DEBUG
-		// DEBUG
-		angle=-angle+Math.PI*5/2;
-		return Math.round(angle/(Math.PI*2/this._altCount))%this._altCount;
-	}
+		if(typeof angle!='number') throw (this.id+': _getAngleIndex(θ) parameter "θ" must be a number; got a typeof('+angle+')=='+typeof angle); // DEBUG
+		angle=Math.PI*5/2-angle;
 
+		angle%=Math.PI*2;
+		angle/=Math.PI*2;
+		angle*=this._altCount;
+		return Math.round(angle)%this._altCount;
+	}
 
 
 	// Constructor
