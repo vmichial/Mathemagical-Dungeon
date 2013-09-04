@@ -5,8 +5,8 @@ var mouse={ x: 0, y: 0 };
 var cat;
 
 
-window.onload=function() { // Makes sure the website is loaded before running code
-	canvas=document.getElementById('canvas');
+$(document).ready(function() {
+	canvas=$('#canvas')[0];
 	ctx=canvas.getContext('2d');
 
 
@@ -28,4 +28,4 @@ window.onload=function() { // Makes sure the website is loaded before running co
 		mouse.x=e.offsetX;
 		mouse.y=e.offsetY;
 	}
-};
+});
