@@ -2,15 +2,18 @@
 var canvas, ctx;
 var mouse={ x: 0, y: 0 };
 
-var r_board;
+var s_board;
 var cat;
-
-var g_boardAngle=(Math.PI*0.152).toFixed(4);
 
 
 $(document).ready(function() {
 	canvas=$('#canvas')[0];
 	ctx=canvas.getContext('2d');
+
+
+	s_board=new Scene();
+
+
 
 
 
