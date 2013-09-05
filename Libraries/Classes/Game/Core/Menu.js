@@ -14,7 +14,7 @@ var Label = function(Parent, Text, fontSize, IMG, TextX,TextY,ImX,ImY){
 	this.textY = Texty;
 	this.imX = ImX;
 	this.imY = Imy;
-	this.font = fontSize+"px Arial";
+	this.font = ""+fontSize+"px Arial";
 	
 	this.draw(){
 		if(that.text!='undefined'){
@@ -46,10 +46,15 @@ var Button = function(Parent,img,Xdraw,Ydraw,Height,Width){
 		this.ctx.drawImage(img,Xdraw,Ydraw);
 	}
 }
-var Menu = function(Parent,BGimages,Music,Buttons,Labels){
+var Menu = function(Parent,BGimages,Music,Buttons,Labels,NextString){
+	
+	this.nextString = (NextString=='undefined') ? "END" : NextString ;
 	this.context = Parent.context;
 	this.FPS = 60;
 	this.bgImages = BGimages;
-	this.Buttons = new Array();
+	this.buttons = Buttons;
+	this.labels = Labels;
+	
+	
 	
 }
