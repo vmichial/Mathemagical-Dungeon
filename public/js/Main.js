@@ -16,10 +16,9 @@ $(document).ready(function() {
 
 
 
-
-	cat=new Ent('ent_nyancat');
-	cat.addTexture('nyanCat');
-	cat.addTexture('nyanCat', { x: 64, y: 64 });
+	tex=new Texture('nyanCat', { x: 64, y: 64 });
+	cat=new Entity('ent_nyancat');
+	cat.addTex(tex);
 
 	cat._pos={ x: 100, y: 100 };
 

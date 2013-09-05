@@ -61,13 +61,13 @@ var Entity=function(id) {
 	this.Entity=function(id, textures) {
 		this.id=id;
 		if(textures!=undefined) {
-			this.textures=textures;
+			this._texArr=textures;
 		}
 	}
 
 
 	// Draw all textures
-	this.draw=function(ctx) { for(i=0; i<this.textures.length; ++i) this.textures[i].draw(ctx, this._pos); }
+	this.draw=function(ctx) { for(i=0; i<this._texArr.length; ++i) this._texArr[i].draw(ctx, this._pos); }
 
 	// Each call makes the entity move closer to a desired state, like
 	//		walking to a destination, facing a direction, 
@@ -78,13 +78,13 @@ var Entity=function(id) {
 
 		// movement smoothing
 
-		for(i=0; i<this.textures.length; ++i) this.textures[i].step();
+		for(i=0; i<this._texArr.length; ++i) this._texArr[i].step();
 	}
 
 
 	// Texture management
 	this.addTex=function(texture) {
-		if(typeof texture!='object') throw (this.id+': addTex(texture) parameter "texture" must be a class Entity'); // DEBUG
+		if(typeof texture!='object') throw (this.id+': addTex(texture) parameter "texture" must be a class Texture'); // DEBUG
 		var id=texture.id;
 		if(typeof id!='string') throw (this.id+': addTex(texture) parameter "texture.id" must be a string; got a typeof('+id+')=='+typeof id); // DEBUG
 		mapAdd(this._texArr, this._texMap, texture, function(obj) { return obj.id; });
@@ -207,7 +207,7 @@ var Entity=function(id) {
 		} else {
 			this._angle=this.angleOf(angle);
 		}
-		for(i=0; i<this.textures.length; ++i) this.textures[i].face(this._angle);
+		for(i=0; i<this._texArr.length; ++i) this._texArr[i].face(this._angle);
 		return this._angle;
 	}
 
@@ -269,7 +269,7 @@ var Entity=function(id) {
 			else this._angle+=diff<0?-this._omega:this._omega; // Turn towards the destination
 
 			this._angle=(this._angle+Math.PI*2)%(Math.PI*2);
-			for(var i=0; i<this.textures.length; ++i) this.textures[i].face(this._angle);
+			for(var i=0; i<this._texArr.length; ++i) this._texArr[i].face(this._angle);
 		}
 
 		// Return false if not facing the target
