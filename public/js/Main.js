@@ -13,30 +13,6 @@ $(document).ready(function() {
 	ctx=canvas.getContext('2d');
 
 
-	// Make a new game board
-
-	r_board=$('#board'); // Point to the game board
-	r_board.css('transform', 'rotate('+(g_boardAngle)+'rad)');
-	var board='', x=6, y=8, z=1, i;
-
-	for(j=0; j<x; ++j) {
-		var r_row=$('<div>', {
-			class: 'tileRow'
-		}).appendTo(r_board);
-		r_row.css('padding-left', (x-j)*32);
-
-		for(var k=0; k<y; ++k) {
-			var r_tile=$('<div>', {
-				class: 'tile t_greyF'
-			}).appendTo(r_row);
-			r_tile.css('margin-right', -44);
-			r_tile.css('margin-bottom', -60);
-			r_tile.css('transform', 'rotate('+(-g_boardAngle)+'rad) translate3d( 0px, 0px, 0px)');
-		}
-	}
-	//.on('click',function(){if($(this).
-
-
 
 	cat=new Ent('ent_nyancat');
 	cat.addTexture('nyanCat');
