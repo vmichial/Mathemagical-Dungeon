@@ -2,6 +2,8 @@
 var canvas, ctx;
 var mouse={ x: 0, y: 0 };
 
+var s_menu;
+var gamePaused=false;
 
 
 $(document).ready(function() {
@@ -9,6 +11,15 @@ $(document).ready(function() {
 	ctx=canvas.getContext('2d');
 
 
+	// Example of creating 3 scenes
+	s_game=new Scene();
+	s_menu=new Scene();
+	s_ui=new Scene();
+
+	// Functions where each part is defined
+	initMenu();
+	//initGame();	Dont exist yet
+	//initUI();
 
 
 	canvas.onmousemove=mouseMove; // Update mouse position
@@ -21,7 +32,23 @@ $(document).ready(function() {
 	setInterval(function() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+		// Display a message
+		ctx.font='24px Arial';
+		ctx.fillStyle='#ffffff';
+		if(gamePaused) ctx.fillText('{space} = Exit menu', 4, 24);
+		else ctx.fillText('{space} = Open menu', 4, 24);
 
+
+		if(!gamePaused) { // Dont update the game world or HUD
+			s_game.step(); //		when paused
+			s_ui.step();
+		}
+		s_menu.step();
+
+		// Always draw em all though
+		s_game.draw(ctx);
+		s_ui.draw(ctx);
+		s_menu.draw(ctx);
 	}, 1000/g_fpsEngine);
 });
 
@@ -60,5 +87,9 @@ function mouseClick(e) { // Clicking
 
 function kbKey(e) { // Keyboard keys
 	switch(e.keyCode) {
+		case ' '.charCodeAt(0): // Space
+			gamePaused=!gamePaused;
+			s_menu.pause(gamePaused);
+			break;
 	}
 }
