@@ -108,7 +108,7 @@ var Entity=function(id, onStepFunc) {
 		this.pos.x+=to*Math.cos(ang);
 		this.pos.y-=to*Math.sin(ang);
 
-		return this.pos;
+		return destPos.x.toFixed(1)==this.pos.x.toFixed(1)&&destPos.y.toFixed(1)==this.pos.y.toFixed(1);
 	}
 
 
@@ -160,7 +160,7 @@ var Entity=function(id, onStepFunc) {
 		}
 		this.face(this.angle);
 
-		return this.angle;
+		return this.angle.toFixed(4)==destAng.toFixed(4);
 	}
 
 

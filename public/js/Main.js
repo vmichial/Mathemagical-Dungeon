@@ -79,8 +79,8 @@ function mouseClick(e) { // Clicking
 			mouse.y=e.offsetY;
 			break;
 		case 2:
-			mouse.x=e.layerX;
-			mouse.y=e.layerY;
+			mouse.x=e.layerX-canvas.offsetLeft;
+			mouse.y=e.layerY-canvas.offsetTop;
 			break;
 	}
 }
