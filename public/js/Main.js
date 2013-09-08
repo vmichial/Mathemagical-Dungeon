@@ -18,7 +18,7 @@ $(document).ready(function() {
 
 	// Functions where each part is defined
 	initMenu();
-	//initGame();	Dont exist yet
+	initGame();
 	initUI();
 
 
@@ -36,7 +36,10 @@ $(document).ready(function() {
 		ctx.font='24px Arial';
 		ctx.fillStyle='#ffffff';
 		if(gamePaused) ctx.fillText('{space} = Exit menu', 4, 24);
-		else ctx.fillText('{space} = Open menu', 4, 24);
+		else {
+			ctx.fillText('{space} = Open menu', 4, 24);
+			ctx.fillText('   Target your foes!', 4, 52);
+		}
 
 
 		if(!gamePaused) { // Dont update the game world or HUD
