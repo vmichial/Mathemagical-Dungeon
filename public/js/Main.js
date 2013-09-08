@@ -2,7 +2,7 @@
 var canvas, ctx;
 var mouse={ x: 0, y: 0 };
 
-var s_ui, s_menu;
+var s_game, s_ui, s_menu;
 var gamePaused=false;
 
 
@@ -15,6 +15,7 @@ $(document).ready(function() {
 	s_game=new Scene();
 	s_menu=new Scene();
 	s_ui=new Scene();
+
 
 	// Functions where each part is defined
 	initMenu();
@@ -42,8 +43,9 @@ $(document).ready(function() {
 		}
 
 
-		if(!gamePaused) { // Dont update the game world or HUD
-			s_game.step(); //		when paused
+		// Only update the menu scene when paused
+		if(!gamePaused) {
+			s_game.step();
 			s_ui.step();
 		}
 		s_menu.step();
@@ -53,7 +55,7 @@ $(document).ready(function() {
 		s_ui.draw(ctx);
 		s_menu.draw(ctx);
 	}, 1000/g_fpsEngine);
-});
+})
 
 
 var mouseBrowser=0; // Browser detection
