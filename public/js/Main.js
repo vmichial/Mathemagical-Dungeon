@@ -2,7 +2,7 @@
 var canvas, ctx;
 var mouse={ x: 0, y: 0 };
 
-var s_menu;
+var s_ui, s_menu;
 var gamePaused=false;
 
 
@@ -19,7 +19,7 @@ $(document).ready(function() {
 	// Functions where each part is defined
 	initMenu();
 	//initGame();	Dont exist yet
-	//initUI();
+	initUI();
 
 
 	canvas.onmousemove=mouseMove; // Update mouse position
