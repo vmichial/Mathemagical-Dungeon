@@ -2,7 +2,7 @@
 var canvas, ctx;
 var mouse={ x: 0, y: 0 };
 
-var s_game, s_ui, s_menu;
+var s_world, s_game, s_ui, s_menu;
 var gamePaused=false;
 
 
@@ -12,12 +12,14 @@ $(document).ready(function() {
 
 
 	// Example of creating 3 scenes
+	s_world=new Scene('s_world');
 	s_game=new Scene('s_game');
 	s_menu=new Scene('s_menu');
 	s_ui=new Scene('s_ui');
 
 
 	// Functions where each part is defined
+	initWorld();
 	initMenu();
 	initGame();
 	initUI();
@@ -45,12 +47,14 @@ $(document).ready(function() {
 
 		// Only update the menu scene when paused
 		if(!gamePaused) {
+			// s_world.step();   Theres actually no animation in our world, so disabling this
 			s_game.step();
 			s_ui.step();
 		}
 		s_menu.step();
 
 		// Always draw em all though
+		s_world.draw(ctx);
 		s_game.draw(ctx);
 		s_ui.draw(ctx);
 		s_menu.draw(ctx);
