@@ -8,9 +8,7 @@
 		for layering textures.
 */
 
-var g_pxm=32; // Global definition of a meter
-
-var Entity=function(id) {
+var Entity=function(id, onStepFunc) {
 	/*
 		Public vars
 	*/
@@ -22,6 +20,17 @@ var Entity=function(id) {
 	this.pause=false;
 	this.hide=false;
 
+	this.pos={ x: 0, y: 0 };
+	this.vel=4;
+
+	this.angle=0;
+	this.omega=Math.PI/2;
+
+
+	// Custom actions to take for step() or draw()
+	this.onStep=undefined;
+	this.onDraw=undefined;
+
 
 
 	/*
@@ -30,22 +39,10 @@ var Entity=function(id) {
 	this._texArr=[];
 	this._texMap={};
 
-	this._pos={ x: 0, y: 0 };
-	this._vel={ x: 0, y: 0 };
-	this._velMax=5;
-	this._accel={ x: 0, y: 0 };
-	this._accel=3;
-	this._accelDamp=1;
+	this._lastAngle=-1; // Last angle reference for redraws
 
-	this._angle=0;
-	this._omega=0;
-	this._omegaMax=Math.PI/8;
-	this._alpha=0;
-	this._alphaMax=Math.PI/16;
-	this._alphaDamp=Math.PI/32;
-
-	this._pxm=g_pxm;           // px/m [pixels per meter]
-	this._pxmFlat=1/this._pxm; //    the entity moves at
+	this._px_m=g_px_m;           // px/m [pixels per meter]
+	this._pxmFlat=1/this._px_m; //    the entity moves at
 
 	this._frame=0;           // < Current frame of an animation
 	this._frameCount=0;      // < Number of frames in an animation
@@ -58,27 +55,117 @@ var Entity=function(id) {
 	/*
 			Public methods
 	*/
-	this.Entity=function(id, textures) {
+	this.Entity=function(id, onStepFunc) {
 		this.id=id;
-		if(textures!=undefined) {
-			this._texArr=textures;
+		this.onStep=onStepFunc;
+	}
+
+
+	this.step=function() {
+		if(this.pause) return;
+		if(this.onStep!=undefined) this.onStep();
+		else this.stepDefault();
+	}
+	// Default step all textures
+	this.stepDefault=function() {
+		if(this._lastAngle!=this.angle) this.face(this.angle);
+		for(i=0; i<this._texArr.length; ++i) this._texArr[i].step();
+	}
+
+	this.draw=function(ctx, offset) {
+		if(this.hide) return;
+		if(this.onDraw!=undefined) this.onDraw(ctx, offset);
+		else this.drawDefault(ctx, offset);
+	}
+	// Default draw all textures
+	this.drawDefault=function(ctx, offset) {
+		for(i=0; i<this._texArr.length; ++i) {
+			if(offset==undefined) this._texArr[i].draw(ctx, this.pos);
+			else this._texArr[i].draw(ctx, { x: this.pos.x+offset.x, y: this.pos.y+offset.y });
 		}
 	}
 
 
-	// Draw all textures
-	this.draw=function(ctx) { for(i=0; i<this._texArr.length; ++i) this._texArr[i].draw(ctx, this._pos); }
+	// Movement
+	this.translate=function(pos) {
+		if(typeof pos!='object') throw (this.id+': translate(pos) pos must take an XY struct'); // DEBUG
+		if(typeof pos.x!='number') throw (this.id+': translate(pos) parameter "pos.x" must be a number; got a typeof('+pos.x+')=='+typeof pos.x); // DEBUG
+		if(typeof pos.y!='number') throw (this.id+': translate(pos) parameter "pos.y" must be a number; got a typeof('+pos.y+')=='+typeof pos.y); // DEBUG
+		this.pos=pos;
+	}
 
-	// Each call makes the entity move closer to a desired state, like
-	//		walking to a destination, facing a direction, 
-	this.step=function() {
-		// angle smoothing
+	// Animates 1 step of a move towards a position
+	this.move=function(destPos) {
+		if(typeof destPos!='object') throw (this.id+': face(destPos) destPos must take an XY struct'); // DEBUG
+		if(typeof destPos.x!='number') throw (this.id+': face(destPos) parameter "destPos.x" must be a number; got a typeof('+destPos.x+')=='+typeof destPos.x); // DEBUG
+		if(typeof destPos.y!='number') throw (this.id+': face(destPos) parameter "destPos.y" must be a number; got a typeof('+destPos.y+')=='+typeof destPos.y); // DEBUG
+		if(this.pause) return this.pos;
 
-		// check to turn 1st or move at the same time
+		var ang=angleOfPos(this.pos, destPos);
 
-		// movement smoothing
+		var p1=this.pos.x-destPos.x;
+		var p2=this.pos.y-destPos.y;
+		var to=Math.sqrt(p1*p1+p2*p2);
 
-		for(i=0; i<this._texArr.length; ++i) this._texArr[i].step();
+		to=this.vel<to?this.vel:to;
+		to*=g_px_m/g_fpsEngine;
+
+		this.pos.x+=to*Math.cos(ang);
+		this.pos.y-=to*Math.sin(ang);
+
+		return destPos.x.toFixed(1)==this.pos.x.toFixed(1)&&destPos.y.toFixed(1)==this.pos.y.toFixed(1);
+	}
+
+
+	// Angles
+	this.face=function(destAng) {
+		// DEBUG: Check angle
+		if(typeof destAng=='number') { // DEBUG
+		} else { // DEBUG
+			if(typeof destAng!='object') throw (this.id+': face(pos) pos must take a number or an XY struct'); // DEBUG
+			if(typeof destAng.x!='number') throw (this.id+': face(pos) parameter "pos.x" must be a number; got a typeof('+destAng.x+')=='+typeof destAng.x); // DEBUG
+			if(typeof destAng.y!='number') throw (this.id+': face(pos) parameter "pos.y" must be a number; got a typeof('+destAng.y+')=='+typeof destAng.y); // DEBUG
+		} // DEBUG
+		// DEBUG
+		if(typeof destAng=='number') this.angle=destAng; // turn(θ)
+		else this.angle=angleOfPos(this.pos, destAng);
+
+		this._lastAngle=this.angle;
+
+		for(i=0; i<this._texArr.length; ++i) this._texArr[i].face(this.angle);
+		return this.angle;
+	}
+
+	// Animates 1 step of a turn towards a direction
+	this.turn=function(destAng) {
+		// DEBUG: Check angle
+		if(typeof destAng=='number') { // DEBUG
+		} else { // DEBUG
+			if(typeof destAng!='object') throw (this.id+': turn(pos) pos must take a number or an XY struct'); // DEBUG
+			if(typeof destAng.x!='number') throw (this.id+': turn(pos) parameter "pos.x" must be a number; got a typeof('+destAng.x+')=='+typeof destAng.x); // DEBUG
+			if(typeof destAng.y!='number') throw (this.id+': turn(pos) parameter "pos.y" must be a number; got a typeof('+destAng.y+')=='+typeof destAng.y); // DEBUG
+		} // DEBUG
+		// DEBUG
+		if(this.pause) return this.angle;
+
+		if(typeof destAng!='number') {
+			if(this.pos.x==destAng.x&&this.pos.y==destAng.y) return this.angle;
+			destAng=angleOfPos(this.pos, destAng);
+		}
+
+		var direction=angleShortest(this.angle, destAng);
+		var shifted=this.omega<Math.abs(direction)?this.omega*(direction<0?-1:1):direction;
+		shifted*=g_r_s/g_fpsEngine;
+
+		this.angle+=shifted;
+		if(this.angle==destAng) {
+			this.angle=destAng;
+		} else {
+			this.angle=angleNormalize(this.angle);
+		}
+		this.face(this.angle);
+
+		return this.angle.toFixed(4)==destAng.toFixed(4);
 	}
 
 
@@ -99,183 +186,14 @@ var Entity=function(id) {
 	}
 
 
-	// Movement
-	this.move=function(pos) {
-		if(typeof pos!='object') throw (this.id+': face(pos) pos must take an XY struct'); // DEBUG
-		if(typeof pos.x!='number') throw (this.id+': face(pos) parameter "pos.x" must be a number; got a typeof('+pos.x+')=='+typeof pos.x); // DEBUG
-		if(typeof pos.y!='number') throw (this.id+': face(pos) parameter "pos.y" must be a number; got a typeof('+pos.y+')=='+typeof pos.y); // DEBUG
-		// DEBUG
-		// Offsets
-		var cx, cy, moved, vel=1;
-		cx=(pos.x-this._pos.x);
-		cy=(pos.y-this._pos.y);
-		moved=(cx!=0||cy!=0);
+
+	/*
+			Private methods
+	*/
 
 
-		// OLD MOVEMENT CONTROL
-		if(moved) {
-			if(this.idle) this.step(); // If animated only on movement
-
-			// Gonna have to do some math to make diagonal movement smooth
-			if(cx==0) {
-				this._vel.x=0;
-			} else {
-				this._vel.x=(cx<0?-1:1)*vel*Math.cos(Math.atan(cy/cx));
-				if(Math.abs(cx)<Math.abs(this._vel.x)) this._pos.x=pos.x;
-				else this._pos.x+=this._vel.x;
-			}
-			if(cy==0) {
-				this._vel.y=0;
-			} else {
-				this._vel.y=(cy<0?-1:1)*Math.sqrt(vel*vel-this._vel.x*this._vel.x);
-				if(Math.abs(cy)<Math.abs(this._vel.y)) this._pos.y=pos.y;
-				else this._pos.y+=this._vel.y;
-			}
-		}
-		//
-
-		return !moved; // Return true if destination reached
-	}
-
-
-	// Angles
-	this.getAngle=function() {
-		return this._angle;
-	}
-	this.setAngle=function(angle, omega, omegaMax, alpha, alphaMax, alphaDamp) { // 5 overloads
-		if(angle==undefined) throw (this.id+': setAngle(θ, ω, ωMax, α, αMax, αDamp) parameter "θ" must be a number; got a typeof('+angle+')=='+typeof angle); // DEBUG
-		if(typeof angle!='number') throw (this.id+': setAngle(θ, ω, ωMax, α, αMax, αDamp) parameter "θ" must be a number; got a typeof('+angle+')=='+typeof angle); // DEBUG
-		this._angle=angle;
-		if(omega!=undefined) {
-			if(typeof omega!='number') throw (this.id+': setAngle(θ, ω, ωMax, α, αMax, αDamp) parameter "ω" must be a number; got a typeof('+omega+')=='+typeof omega); // DEBUG
-			this._omega=omega;
-			if(omegaMax!=undefined) {
-				this._omegaMax=omegaMax;
-				if(typeof omegaMax!='number') throw (this.id+': setAngle(θ, ω, ωMax, α, αMax, αDamp) parameter "ωMax" must be a number; got a typeof('+omegaMax+')=='+typeof omegaMax); // DEBUG
-				if(alpha!=undefined) {
-					if(typeof alpha!='number') throw (this.id+': setAngle(θ, ω, ωMax, α, αMax, αDamp) parameter "α" must be a number; got a typeof('+alpha+')=='+typeof alpha); // DEBUG
-					if(alphaMax!=undefined) {
-						this._alpha=alpha;
-						if(typeof alphaMax!='number') throw (this.id+': setAngle(θ, ω, ωMax, α, αMax, αDamp) parameter "αMax" must be a number; got a typeof('+alphaMax+')=='+typeof alphaMax); // DEBUG
-						this._alphaMax=alphaMax;
-						if(alphaDamp!=undefined) {
-							if(typeof alphaDamp!='number') throw (this.id+': setAngle(θ, ω, ωMax, α, αMax, αDamp) parameter "αDamp" must be a number; got a typeof('+alphaDamp+')=='+typeof alphaDamp); // DEBUG
-							this._alphaDamp=alphaDamp;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	// Get the angle of a direction
-	this.angleOf=function(pos) {
-		if(typeof pos!='object') throw (this.id+': angleOf(pos) pos must take structs with angles'); // DEBUG
-		if(typeof pos.x!='number') throw (this.id+': angleOf(pos) parameter "pos.x" must be a number; got a typeof('+pos.x+')=='+typeof pos.x); // DEBUG
-		if(typeof pos.y!='number') throw (this.id+': angleOf(pos) parameter "pos.y" must be a number; got a typeof('+pos.y+')=='+typeof pos.y); // DEBUG
-		// DEBUG
-		var angle=0;
-		pos.x-=this._pos.x;
-		pos.y-=this._pos.y;
-
-		if(pos.x!=0||pos.y!=0) {
-			if(pos.y==0) {
-				angle=Math.PI/2;
-				if(pos.x<0) angle+=Math.PI;
-			} else {
-				angle=Math.atan(pos.x/pos.y);
-				if(pos.y<0) angle+=Math.PI;
-			}
-			angle+=Math.PI*3/2; // Prevents negative values
-			angle%=Math.PI*2;
-
-		}
-		return angle;
-	}
-
-	this.face=function(angle) {
-		// DEBUG: Check angle
-		if(typeof angle=='number') { // DEBUG
-		} else { // DEBUG
-			if(typeof angle!='object') throw (this.id+': face(pos) pos must take an XY struct'); // DEBUG
-			if(typeof angle.x!='number') throw (this.id+': face(pos) parameter "pos.x" must be a number; got a typeof('+angle.x+')=='+typeof angle.x); // DEBUG
-			if(typeof angle.y!='number') throw (this.id+': face(pos) parameter "pos.y" must be a number; got a typeof('+angle.y+')=='+typeof angle.y); // DEBUG
-		} // DEBUG
-		// DEBUG
-		if(typeof angle=='number') { // turn(θ)
-			this._angle=angle;
-		} else {
-			this._angle=this.angleOf(angle);
-		}
-		for(i=0; i<this._texArr.length; ++i) this._texArr[i].face(this._angle);
-		return this._angle;
-	}
-
-	// Animate a turn towards a direction
-	this.turn=function(angle) {
-		// DEBUG: Check angle
-		if(typeof angle=='number') { // DEBUG
-		} else { // DEBUG
-			if(typeof angle!='object') throw (this.id+': turn(pos) pos must take an XY struct'); // DEBUG
-			if(typeof angle.x!='number') throw (this.id+': turn(pos) parameter "pos.x" must be a number; got a typeof('+angle.x+')=='+typeof angle.x); // DEBUG
-			if(typeof angle.y!='number') throw (this.id+': turn(pos) parameter "pos.y" must be a number; got a typeof('+angle.y+')=='+typeof angle.y); // DEBUG
-		} // DEBUG
-		// DEBUG
-
-
-		// OLD TURN CODE [not gonna work]
-		if(typeof angle=='number') { // turn(angle)
-			angle;
-		} else {
-			if(typeof pos=='number') { // turn(angle)
-				destAng=x;
-			} else { // turn(x, y)
-				angle.x-=this._pos.x;
-				angle.y-=this._pos.y;
-
-				if(angle.x!=0||angle.y!=0) {
-					if(angle.y==0) {
-						destAng=Math.PI/2;
-						if(angle.x<0) destAng+=Math.PI;
-					} else {
-						destAng=Math.atan(x/y);
-						if(angle.y<0) destAng+=Math.PI;
-					}
-					destAng+=Math.PI*3/2; // Prevents negative values
-					destAng%=Math.PI*2;
-				}
-
-				this.angleOf(angle);
-			}
-		}
-		// DEBUG
-		var destAng=0, finalDest=0;
-
-		this._omega=this._omegaMax; // temp until new code
-		if(typeof angle=='number') { // turn(θ)
-			destAng=angle;
-		}
-		finalDest=destAng;
-
-		var diff=destAng-this._angle; // Get the difference in angle
-		if(Math.abs(diff.toFixed(8))!=0) {
-			console.log(this._angle)
-			if(diff<0) diff+=Math.PI*2;
-
-			if(destAng<this._angle) destAng+=Math.PI*2; // Adjust to get a difference [related to unit circle]
-			if(Math.PI<diff) diff-=Math.PI*2; // Adjust to make it from -π to π
-
-			if(Math.abs(diff)<=this._omega) this._angle=destAng; // Snap to destination
-			else this._angle+=diff<0?-this._omega:this._omega; // Turn towards the destination
-
-			this._angle=(this._angle+Math.PI*2)%(Math.PI*2);
-			for(var i=0; i<this._texArr.length; ++i) this._texArr[i].face(this._angle);
-		}
-
-		// Return false if not facing the target
-		return (this._angle.toFixed(8)==finalDest.toFixed(8));
-	}
 
 	// Constructor
-	this.Entity(id);
+	this.Entity(id, onStepFunc);
+	this.__whatami='class Entity';
 };
