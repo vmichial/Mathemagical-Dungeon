@@ -17,14 +17,13 @@ var Entity=function(id, onStepFunc) {
 	this.mid={ x: undefined, y: undefined };
 	this.hitbox=32; // Defined as a radius or an XY struct
 
-	this.pause=false;
-	this.hide=false;
-
 	this.pos={ x: 0, y: 0 };
 	this.vel=4;
-
 	this.angle=0;
 	this.omega=Math.PI/2;
+
+	this.pause=false;
+	this.hide=false;
 
 
 	// Custom actions to take for step() or draw()
@@ -60,6 +59,30 @@ var Entity=function(id, onStepFunc) {
 		this.onStep=onStepFunc;
 	}
 
+
+	// Set/Get MPS
+	this.getPXM=function() { return this._px_m; }
+	this.setPXM=function(pixels_per_meter) {
+		if(typeof pixels_per_meter!='number') throw (this.id+': setPXM(pixels_per_meter) parameter "pixels_per_meter" must be a number; got a typeof('+pixels_per_meter+')=='+typeof pixels_per_meter); // DEBUG
+		this._px_m=pixels_per_meter;
+		this._pxmFlat=1/this._px_m;
+	}
+
+	// Texture management
+	this.addTex=function(texture) {
+		if(typeof texture!='object') throw (this.id+': addTex(texture) parameter "texture" must be a class Texture'); // DEBUG
+		var id=texture.id;
+		if(typeof id!='string') throw (this.id+': addTex(texture) parameter "texture.id" must be a string; got a typeof('+id+')=='+typeof id); // DEBUG
+		mapAdd(this._texArr, this._texMap, texture, function(obj) { return obj.id; });
+	}
+	this.getTex=function(id) {
+		if(typeof id!='number'&&typeof id!='string') throw (this.id+': getTex(id) parameter "id" must be a number or string; got a typeof('+id+')=='+typeof id); // DEBUG
+		return mapGet(this._texArr, this._texMap, id);
+	}
+	this.delTex=function(id) {
+		if(typeof id!='number'&&typeof id!='string') throw (this.id+': delTex(id) parameter "id" must be a number or string; got a typeof('+id+')=='+typeof id); // DEBUG
+		mapDel(this._texArr, this._texMap, id, function(obj) { return obj.id; });
+	}
 
 	this.step=function() {
 		if(this.pause) return;
@@ -168,22 +191,6 @@ var Entity=function(id, onStepFunc) {
 		return this.angle.toFixed(4)==destAng.toFixed(4);
 	}
 
-
-	// Texture management
-	this.addTex=function(texture) {
-		if(typeof texture!='object') throw (this.id+': addTex(texture) parameter "texture" must be a class Texture'); // DEBUG
-		var id=texture.id;
-		if(typeof id!='string') throw (this.id+': addTex(texture) parameter "texture.id" must be a string; got a typeof('+id+')=='+typeof id); // DEBUG
-		mapAdd(this._texArr, this._texMap, texture, function(obj) { return obj.id; });
-	}
-	this.getTex=function(id) {
-		if(typeof id!='number'&&typeof id!='string') throw (this.id+': getTex(id) parameter "id" must be a number or string; got a typeof('+id+')=='+typeof id); // DEBUG
-		return mapGet(this._texArr, this._texMap, id);
-	}
-	this.delTex=function(id) {
-		if(typeof id!='number'&&typeof id!='string') throw (this.id+': delTex(id) parameter "id" must be a number or string; got a typeof('+id+')=='+typeof id); // DEBUG
-		mapDel(this._texArr, this._texMap, id, function(obj) { return obj.id; });
-	}
 
 
 

@@ -29,13 +29,12 @@ var Texture=function(id, tileSize) { // 2 overloads
 	this.id='';
 	this.img=null;
 
-	this.size={ x: 0, y: 0 }; // Size of image
-	this.scale={ x: 1, y: 1 }; // scale to this size [1=normal]
 	this.mid={ x: undefined, y: undefined }; // Mid point of the texture to center on when drawn
 
-	// Tile size [default: size of image]
-	// Setting it will allow for animated textures
-	this.tileSize={ x: 0, y: 0 };
+	this.size={ x: 0, y: 0 }; // Size of image
+	this.tileSize={ x: 0, y: 0 }; // Setting this will allow for animated textures [default: size of image]
+	this.scale={ x: 1, y: 1 }; // scale to this size [1=normal]
+
 
 	//	Some nice features to have for animation:
 	this.pause=false;
@@ -95,6 +94,58 @@ var Texture=function(id, tileSize) { // 2 overloads
 		}
 	}
 
+
+	// Set/Get FPS
+	this.getFPS=function() { return this._fps; }
+	this.setFPS=function(fps) {
+		if(typeof fps!='number') throw (this.id+': setFPS(fps) parameter "fps" must be a number; got a typeof('+fps+')=='+typeof fps); // DEBUG
+		var fpsMax=125;
+		this._fps=fps;
+		if(fpsMax<this._fps) this._fps=fpsMax;
+		this._fpsFlat=1000/this._fps;
+	}
+
+	// Sets the size of the tiles & calculates how many frames there are
+	this.refreshProps=function() {
+		// Detect dimensions
+		if(typeof this.img.width!='number') throw ('Image "'+id+'" width could not be detected'); // DEBUG
+		if(typeof this.img.width!='number') throw ('Image "'+id+'" height could not be detected'); // DEBUG
+		// DEBUG
+		this.size.x=this.img.width;
+		this.size.y=this.img.height;
+
+		// Correct tile size
+		if(this.tileSize.x<=0||this.size.x<this.tileSize.x) this.tileSize.x=this.size.x;
+		if(this.tileSize.y<=0||this.size.y<this.tileSize.y) this.tileSize.y=this.size.y;
+
+		// Check if tiled or static image
+		if(this.tileSize.x!=this.size.x||this.tileSize.y!=this.size.y) {
+			this._frame=0;
+			this._frameTime=0;
+			this._frameCount=Math.floor(this.size.x/this.tileSize.x);
+
+			this._alt=0;
+			this._altCount=Math.floor(this.size.y/this.tileSize.y);
+
+			this.static=false;
+
+			console.log('Texture('+this.id+') :: Loaded animated texture'); // DEBUG
+		} else {
+			this._frame=0;
+			this._frameTime=0;
+			this._frameCount=1;
+
+			this._alt=0;
+			this._altCount=1;
+
+			this.static=true;
+
+			console.log('Texture('+this.id+') :: Loaded static texture'); // DEBUG
+		}
+
+		if(this.mid.x==undefined) this.mid.x=this.tileSize.x/2;
+		if(this.mid.y==undefined) this.mid.y=this.tileSize.y/2;
+	}
 
 	// This steps in the animation & returns the number of steps taken
 	this.step=function() {
@@ -172,58 +223,6 @@ var Texture=function(id, tileSize) { // 2 overloads
 		return angle;
 	}
 
-
-	// Sets the size of the tiles & calculates how many frames there are
-	this.refreshProps=function() {
-		// Detect dimensions
-		if(typeof this.img.width!='number') throw ('Image "'+id+'" width could not be detected'); // DEBUG
-		if(typeof this.img.width!='number') throw ('Image "'+id+'" height could not be detected'); // DEBUG
-		// DEBUG
-		this.size.x=this.img.width;
-		this.size.y=this.img.height;
-
-		// Correct tile size
-		if(this.tileSize.x<=0||this.size.x<this.tileSize.x) this.tileSize.x=this.size.x;
-		if(this.tileSize.y<=0||this.size.y<this.tileSize.y) this.tileSize.y=this.size.y;
-
-		// Check if tiled or static image
-		if(this.tileSize.x!=this.size.x||this.tileSize.y!=this.size.y) {
-			this._frame=0;
-			this._frameTime=0;
-			this._frameCount=Math.floor(this.size.x/this.tileSize.x);
-
-			this._alt=0;
-			this._altCount=Math.floor(this.size.y/this.tileSize.y);
-
-			this.static=false;
-
-			console.log('Texture('+this.id+') :: Loaded animated texture'); // DEBUG
-		} else {
-			this._frame=0;
-			this._frameTime=0;
-			this._frameCount=1;
-
-			this._alt=0;
-			this._altCount=1;
-
-			this.static=true;
-
-			console.log('Texture('+this.id+') :: Loaded static texture'); // DEBUG
-		}
-
-		if(this.mid.x==undefined) this.mid.x=this.tileSize.x/2;
-		if(this.mid.y==undefined) this.mid.y=this.tileSize.y/2;
-	}
-
-	// Set/Get FPS
-	this.getFPS=function() { return this._fps; }
-	this.setFPS=function(fps) {
-		if(typeof fps!='number') throw (this.id+': setFPS(fps) parameter "fps" must be a number; got a typeof('+fps+')=='+typeof fps); // DEBUG
-		var fpsMax=125;
-		this._fps=fps;
-		if(fpsMax<this._fps) this._fps=fpsMax;
-		this._fpsFlat=1000/this._fps;
-	}
 
 	// True if the animation is not looped & the end is reached
 	this.isEnd=function() {

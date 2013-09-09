@@ -12,15 +12,11 @@ var Scene=function(id, onStepFunc) {
 	*/
 	this.id='';
 
-	this.pos={ x: 0, y: 0 };
 	this.mid={ x: undefined, y: undefined };
+	this.pos={ x: 0, y: 0 };
 
 	this.pause=false;
 	this.hide=false;
-
-	// 2 ways to access entities
-	this._entArr=[];
-	this._entMap={};
 
 
 	// Custom actions to take for step() or draw()
@@ -32,6 +28,8 @@ var Scene=function(id, onStepFunc) {
 	/*
 		Private vars
 	*/
+	this._entArr=[];
+	this._entMap={};
 
 
 
