@@ -32,37 +32,47 @@ var canvasWidth = 1024;
 Canvas.height = canvasHeight;
 Canvas.width = canvasWidth;
 
-var SceneManager = function(can,con){
+var FPS = 60;
+
+var SceneManager = function(can,con){	
 	this.canvas = can;
 	this.context = con;
 	var that = this;
 	//loadloop is for adding a set interval. this will run a function 
 	//over and over. When init is called, you will get a load screen
 	//loop that shows how much of the assets are loaded.
-	this.loadLoop;
+	var loadLoop;
 	this.loadImage= new Image();
-	this.loadImage.src = "";
+	this.loadImage.src = "loadingScreen.png";
 	
 	//gameloop is for adding a setinterval. The game loop willrun
 	//the functions from whatever scene is running.
-	this.gameLoop;
+	var gameLoop;
 	//this array holds references to the scene objects you have
 	this.scenes = new Array();
 	
 	//by default the current scene is negative one, which is no scene
 	this.currentScene = -1;
+	this.lastScene = -1;
 	
 	//this adds the scene to the array
 	this.addScene = function(scene){
-		this.scenes[numScenes++] = scene;
+		this.setParent(scene);
+		this.scenes[numScenes] = scene;
 	}
 	
 	this.findSceneByName = function(NAME){
 		if(this.scenes.length == 0){this.currentScene = -1; return;}
 		for( var i = 0; i<this.scenes.length; i++){
-			if(this.scenes[i].name == NAME){this.currentScene = i;return;}
+			if(this.scenes[i].name == NAME){this.lastScene=this.currentScene; this.currentScene = i;return;}
 		}
 		this.currentScene = 0;
+	}
+	
+	//this function will change the current scene for watever scene came before, 
+	//best used for menu scenes that exist with another scene, like pause menus
+	this.prevScene = function(){
+		this.currentScene = this.lastScene;
 	}
 	
 	//this array is for image objects representing thecore game
@@ -73,6 +83,11 @@ var SceneManager = function(can,con){
 	this.soundsReady = new Array();//bools representing if they are ready
 		
 	this.coreObjects = new Array();
+	
+	//scenes have a right to change info in the manager, so set parent gives the scene a ref
+	this.setParent = function(scene){
+		scene.parent = that;
+	}
 	
 	//clickHandler is never called explicitly by the programmer
 	//you should not be polling to know if a click happened,
@@ -96,32 +111,86 @@ var SceneManager = function(can,con){
 		this.scenes[this.currentScene].keyUpHandler(evt);
 	}
 	
+	this.playScenes = function(){
+		console.log(that.scenes)
+		that.Scenes[that.currentScene].update();
+		that.Scenes[that.currentScene].draw();
+	}
+	
 	this.playGame = function(){
-		
+		this.currentScene = 0;
+		gameLoop = setInterval(that.playScenes,1000,FPS);
 	}
 	
 	//once you call init, you get a loading screen
-	this.Init = function(){
+	this.init = function(parent){
+		this.coreImages[0] = new Array();
+		this.coreImages[0][0] = new Image();
+		this.coreImages[0][1] = new Image();
+		this.coreImages[0][2] = new Image();
+		this.coreImages[0][3] = new Image();
+		this.coreImages[0][4] = new Image();
+		this.coreImages[0][5] = new Image();
+		this.coreImages[0][0].onload = function(){that.imagesReady[0] = true;}
+		this.coreImages[0][1].onload = function(){that.imagesReady[1] = true;}
+		this.coreImages[0][2].onload = function(){that.imagesReady[2] = true;}
+		this.coreImages[0][3].onload = function(){that.imagesReady[3] = true;}
+		this.coreImages[0][4].onload = function(){that.imagesReady[4] = true;}
+		this.coreImages[0][5].onload = function(){that.imagesReady[5] = true;}
 		
+		this.coreImages[0][0].src = "Assets/Images/Tiles/Core/GreyWorld/GreyWorld_Floor.png";
+		this.coreImages[0][1].src = "Assets/Images/Tiles/Core/GreyWorld/GreyWorld_Floor_LeftWall.png";
+		this.coreImages[0][2].src = "Assets/Images/Tiles/Core/GreyWorld/GreyWorld_Floor_RightWall.png";
+		this.coreImages[0][3].src = "Assets/Images/Tiles/Core/GreyWorld/GreyWorld_Floor_TopCorner.png";
+		this.coreImages[0][4].src = "Assets/Images/Tiles/Core/GreyWorld/GreyWorld_LeftWall.png";
+		this.coreImages[0][5].src = "Assets/Images/Tiles/Core/GreyWorld/GreyWorld_RightWall.png";
+		
+		this.coreSounds[0] = new Audio("Assets/Sounds/Core/Music/Burn My Dread.mp3");
+		console.log(this.coreSounds[0]);
+		this.soundsReady[0] = false;
+		this.coreSounds[0].addEventListener('canplaythrough',function(){that.soundsReady[0] = true; that.coreSounds[0].play();},false);
+		
+		for(var i = 0; i<this.coreImages[0].length ; i++){
+				this.imagesReady[i] = false;
+		}
+		
+		
+		loadLoop = setInterval(that.loading, 1000/FPS);
+	}
+	
+	this.picsReady = function(bools){
+		for(var i=0;i<bools.length;i++){
+			if(bools[i] == false) return false;
+		}
+		return true;
+	}
+	
+	this.audiosReady = function(bools){
+		for(var i=0;i<bools.length;i++){
+			if(bools[i] == false) return false;
+		}
+		return true;
 	}
 	
 	//this handles the loading screen
-	this.loading = function(){
-		if( this.picsReady() && this.auidosReady() ){
-			clearInterval(this.loadLoop);
-			this.playGame();
+	that.loading = function(){
+		//console.log(that.imagesReady);
+		if( that.picsReady(that.imagesReady) && that.audiosReady(that.soundsReady) ){
+			clearInterval(that.loadLoop);
+			that.context.clearRect(0,0,that.canvas.width, that.canvas.height);
+			that.playGame();
 		}
 		else{
-			this.canvas.drawImage
+			that.context.drawImage(that.loadImage,0,0);
 		}
 	}
-	
 	
 	
 
 
 }
 var GameManager = new SceneManager(Canvas,context);
+GameManager.init();
 //the events we listen for are clicking down, pressing a key, and releasing a key
 Canvas.addEventListener('mousedown', GameManager.ClickHandler,false);
 Canvas.addEventListener('keydown', GameManager.keyDownHandler, false);
