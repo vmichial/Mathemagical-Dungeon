@@ -3,7 +3,8 @@
 */
 
 
-// UI stuff like cursor or score
+// Game stuff like cats, bullets, even the world, but this sample,
+//		the world will be in a different scene.
 function initGame() {
 	for(var i=0; i<8; ++i) {
 		var ent_cat=new Entity('ent_cat'+i);
