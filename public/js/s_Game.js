@@ -20,7 +20,7 @@ function initGame() {
 			x: Math.round(Math.random()*s_world.size.x), // Random initial position
 			y: Math.round(Math.random()*s_world.size.y)
 		};
-		ent_cat.translate(s_world.getTilePos(ent_cat.tilePos)); // Convert to XY coord & translate there
+		ent_cat.translate(s_world.tileToPos(ent_cat.tilePos)); // Convert to XY coord & translate there
 
 		ent_cat.face(Math.random()*Math.PI*2);
 
@@ -32,15 +32,15 @@ function initGame() {
 			var reached=this.move(this.dest);
 			if(reached) {
 				var dir=Math.round(Math.random()*4); // Random assign a direction
-				var newX=this.tilePos.x+(dir==0?1:dir==1?-1:0);
-				var newY=this.tilePos.y+(dir==2?1:dir==3?-1:0);
 
 				this.tilePos={ // Make sure it doesnt go off the world
-					x: (newX<0?0:(s_world.size.x<=newX?s_world.size.x-1:newX)),
-					y: (newY<0?0:(s_world.size.y<=newY?s_world.size.y-1:newY))
+					x: this.tilePos.x+(dir==0?1:dir==1?-1:0),
+					y: this.tilePos.y+(dir==2?1:dir==3?-1:0),
+					z: 0
 				}; // This will be included in the library in the future
+				s_world.tileFixRange(this.tilePos);
 
-				this.dest=s_world.getTilePos(this.tilePos)
+				this.dest=s_world.tileToPos(this.tilePos)
 			}
 
 			// The default step, which steps all animations.

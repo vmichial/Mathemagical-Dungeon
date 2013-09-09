@@ -38,6 +38,7 @@ function mapDel(arr, map, id, callbackGetID) {
 	var delKey;
 	if(typeof id=='number') {
 		delKey=id;
+		id=arr[delKey].id;
 		if(arr.length<=delKey) throw ('mapDel() out of bound exception');
 	} else {
 		delKey=map[id]; // Find where it is
@@ -53,7 +54,7 @@ function mapDel(arr, map, id, callbackGetID) {
 		//console.log(delKey+' <-- '+swapKey); // keys to swap
 		//console.log(arr);
 		//console.log(map);
-		//throw ('------------------------');
+		//console.log('------------------------');
 
 		id=callbackGetID(arr[swapKey]);
 		arr[delKey]=arr[swapKey]; // Swap the end to the left

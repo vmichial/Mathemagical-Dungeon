@@ -151,8 +151,8 @@ var Scene=function(id, onStepFunc) {
 	}
 
 
-	// Hitbox for clicking
-	this.clickWhat=function(targetPos) {
+	// Hitbox for something like clicking
+	this.hitPos=function(targetPos) {
 		if(typeof targetPos!='object') throw (this.id+': hitWhat(targetPos) targetPos must take a number or an XY struct'); // DEBUG
 		if(typeof targetPos.x!='number') throw (this.id+': hitWhat(targetPos) parameter "targetPos.x" must be a number; got a typeof('+targetPos.x+')=='+typeof targetPos.x); // DEBUG
 		if(typeof targetPos.y!='number') throw (this.id+': hitWhat(targetPos) parameter "targetPos.y" must be a number; got a typeof('+targetPos.y+')=='+typeof targetPos.y); // DEBUG

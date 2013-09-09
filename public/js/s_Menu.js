@@ -84,7 +84,7 @@ function initMenu() {
 
 	// Set the event's function
 	s_menu.onStep=function() { // onStep() is 1 of the 2 customizable event
-		var selected=s_menu.clickWhat(mouse);
+		var selected=s_menu.hitPos(mouse);
 		if(selected!=this.buttonChoose) { // Typical swap
 			if(-1<this.buttonChoose) {
 				var last=this.getEnt(this.buttonChoose);

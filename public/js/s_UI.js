@@ -19,7 +19,7 @@ function initUI() {
 	// Make it target something
 	s_ui.target=undefined;
 	s_ui.onStep=function() { // onStep() is 1 of the 2 customizable event
-		var who=s_game.clickWhat(mouse); // Who are you targeting
+		var who=s_game.hitPos(mouse); // Who are you targeting
 		if(who!=-1) {
 			this.target=s_game.getEnt(who);
 		}
