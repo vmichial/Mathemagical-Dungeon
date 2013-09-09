@@ -23,8 +23,9 @@ var Scene=function(id, onStepFunc) {
 	this._entMap={};
 
 
-	// Custom actions to take just before each step()
+	// Custom actions to take for step() or draw()
 	this.onStep=undefined;
+	this.onDraw=undefined;
 
 
 
@@ -59,17 +60,24 @@ var Scene=function(id, onStepFunc) {
 	}
 
 
-	// Drawing
 	this.step=function() {
-		if(this.onStep!=undefined) this.onStep(); // Call user defined step 1st
-
-		// Extra stuff here?
-
+		if(this.pause) return;
+		if(this.onStep!=undefined) this.onStep();
+		else this.stepDefault();
+	}
+	// Default step all entities
+	this.stepDefault=function() {
 		for(var i=0; i<this._entArr.length; ++i) this._entArr[i].step();
 	}
 
+	// Drawing
 	this.draw=function(ctx) {
 		if(this.hide) return;
+		if(this.onDraw!=undefined) this.onDraw(ctx);
+		else this.drawDefault(ctx);
+	}
+	// Default draw all entities
+	this.drawDefault=function(ctx) {
 		for(var i=0; i<this._entArr.length; ++i) this._entArr[i].draw(ctx, this.pos);
 	}
 

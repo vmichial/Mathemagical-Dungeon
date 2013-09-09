@@ -27,8 +27,9 @@ var Entity=function(id, onStepFunc) {
 	this.omega=Math.PI/2;
 
 
-	// Custom actions to take just before each step()
+	// Custom actions to take for step() or draw()
 	this.onStep=undefined;
+	this.onDraw=undefined;
 
 
 
@@ -60,20 +61,24 @@ var Entity=function(id, onStepFunc) {
 	}
 
 
-	// Each call makes the entity move closer to a desired state, like
-	//		walking to a destination, facing a direction, 
 	this.step=function() {
-		if(this.onStep!=undefined) this.onStep(); // Call user defined step 1st
-
-		// Extra stuff here?
-
+		if(this.pause) return;
+		if(this.onStep!=undefined) this.onStep();
+		else this.stepDefault();
+	}
+	// Default step all textures
+	this.stepDefault=function() {
 		if(this._lastAngle!=this.angle) this.face(this.angle);
 		for(i=0; i<this._texArr.length; ++i) this._texArr[i].step();
 	}
 
-	// Draw all textures
 	this.draw=function(ctx, offset) {
 		if(this.hide) return;
+		if(this.onDraw!=undefined) this.onDraw(ctx, offset);
+		else this.drawDefault(ctx, offset);
+	}
+	// Default draw all textures
+	this.drawDefault=function(ctx, offset) {
 		for(i=0; i<this._texArr.length; ++i) {
 			if(offset==undefined) this._texArr[i].draw(ctx, this.pos);
 			else this._texArr[i].draw(ctx, { x: this.pos.x+offset.x, y: this.pos.y+offset.y });
