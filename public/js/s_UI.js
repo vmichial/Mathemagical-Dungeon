@@ -18,7 +18,7 @@ function initUI() {
 
 	// Make it target something
 	s_ui.target=undefined;
-	s_ui.onStep=function() {
+	s_ui.onStep=function() { // onStep() is 1 of the 2 customizable event
 		var who=s_game.clickWhat(mouse); // Who are you targeting
 		if(who!=-1) {
 			this.target=s_game.getEnt(who);
@@ -26,5 +26,10 @@ function initUI() {
 		if(s_ui.target!=undefined) {
 			this.getEnt('ent_target').move(this.target.pos);
 		}
+
+		// The default step, which steps all animations.
+		//		If you define onStep, this will not be called by default.
+		//		You then have to manually call this in your own onStep()
+		this.stepDefault();
 	}
 }

@@ -6,7 +6,7 @@
 //		Setting the Menu scene
 function initMenu() {
 	// Define a function that will make a pause menu [dis]appear
-	s_menu.pause=function(state) {
+	s_menu.gamePaused=function(state) {
 		// "this" refers to s_menu
 		this.getEnt('pause-bg').getTex('menuPause').reverse=!state;
 		this.getEnt('pause-button0').hide=!state;
@@ -83,9 +83,8 @@ function initMenu() {
 	s_menu.buttonChoose=-1; // Remember chosen button
 
 	// Set the event's function
-	s_menu.onStep=function() { // onStep() is the only rewritable event that exists
+	s_menu.onStep=function() { // onStep() is 1 of the 2 customizable event
 		var selected=s_menu.clickWhat(mouse);
-
 		if(selected!=this.buttonChoose) { // Typical swap
 			if(-1<this.buttonChoose) {
 				var last=this.getEnt(this.buttonChoose);
@@ -99,5 +98,10 @@ function initMenu() {
 			}
 			this.buttonChoose=selected;
 		}
+
+		// The default step, which steps all animations.
+		//		If you define onStep, this will not be called by default.
+		//		You then have to manually call this in your own onStep()
+		this.stepDefault();
 	}
 }

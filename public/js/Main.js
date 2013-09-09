@@ -12,9 +12,9 @@ $(document).ready(function() {
 
 
 	// Example of creating 3 scenes
-	s_game=new Scene();
-	s_menu=new Scene();
-	s_ui=new Scene();
+	s_game=new Scene('s_game');
+	s_menu=new Scene('s_menu');
+	s_ui=new Scene('s_ui');
 
 
 	// Functions where each part is defined
@@ -94,7 +94,7 @@ function kbKey(e) { // Keyboard keys
 	switch(e.keyCode) {
 		case ' '.charCodeAt(0): // Space
 			gamePaused=!gamePaused;
-			s_menu.pause(gamePaused);
+			s_menu.gamePaused(gamePaused);
 			break;
 	}
 }
