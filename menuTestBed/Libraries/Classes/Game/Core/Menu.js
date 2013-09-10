@@ -6,7 +6,7 @@
 	and iterate through them. at a set speed. it will randomly pan
 	through the images. I can play a sound if you wish for bgm.
 */
-var Label = function(Text, fontSize, IMG, TextX,TextY,ImX,ImY){
+var Label = function(Parent, Text, fontSize, IMG, TextX,TextY,ImX,ImY){
 	var that = this;
 	this.img = IMG;
 	this.text = Text;
@@ -15,11 +15,6 @@ var Label = function(Text, fontSize, IMG, TextX,TextY,ImX,ImY){
 	this.imX = ImX;
 	this.imY = Imy;
 	this.font = ""+fontSize+"px Arial";
-	this.parent;
-	
-	this.setParent = function(PARENT){
-		that.parent = PARENT;
-	}
 	
 	this.draw = function(){
 		if(that.text!='undefined'){
@@ -35,46 +30,57 @@ var Label = function(Text, fontSize, IMG, TextX,TextY,ImX,ImY){
 	}
 }
 
-var Button = function(img,Xdraw,Ydraw,Height,Width){
+var Button = function(Parent,img,Xdraw,Ydraw,Height,Width){
 	var that = this;
 	this.xdraw = Xdraw;
 	this.ydraw = Ydraw;
 	this.w = Width;
 	this.h = Height;
-	this.parent;
+	this.parent = Parent;
 	this.ctx = parent.context;
-	
-	this.setParent = function(PARENT){
-		that.parent = PARENT;
-	}
 	
 	this.clicked = function(x,y){
 		return (x>=xdraw && x<xdraw+this.w && y>ydraw && y<ydraw+this.h);
 	}
 	
 	this.draw = function(){
-		this.ctx.drawImage(img,Xdraw,Ydraw);
+		that.ctx.drawImage(img,Xdraw,Ydraw);
 	}
 }
-
-//Draw all the buttons, clickable, init = create all buttons, 
-var Menu = function(BGimages,Music,Buttons,Labels,NextString){
+var Menu = function(Parent,BGimages,Music,Buttons,Labels,NextString){
 	var that = this;
-	this.parent;
+	this.parent = Parent;
 	this.nextString = (NextString=='undefined') ? "END" : NextString ;
-	this.context = this.parent.context;
+	this.context = Parent.context;
 	this.FPS = 60;
 	this.bgImages = BGimages;
 	this.buttons = Buttons;
 	this.labels = Labels;
 	this.music = Music;
-	this.setParent = function(PARENT){
-		that.parent = PARENT;
-	}
 	
 	this.init = function() {
-		if(that.bgImages != 'undefined') {
-			that.parent
+		if (that.music != 'undefined') {
+			that.music.play();
+		}
+		
+	}
+	
+	this.draw = function() {
+		if (that.bgImages != 'undefined') {
+			that.context.drawImage(that.bgImages, 0, 0, 1024, 768);
+		}
+		if (that.buttons != 'undefined') {
+			for(int i = 0; i < that.buttons.length; i++) {
+				var button = that.buttons[i];
+				button.draw();
+			}
+		}
+		if (that.labels != 'undefined') {
+			for (int i = 0; i < that.labels.length; i++) {
+				var label = that.labels[i];
+				label.draw();
+			}
 		}
 	}
+	
 }
