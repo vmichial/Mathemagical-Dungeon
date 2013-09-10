@@ -30,14 +30,14 @@ var Label = function(Parent, Text, fontSize, IMG, TextX,TextY,ImX,ImY){
 	}
 }
 
-var Button = function(Parent,img,Xdraw,Ydraw,Height,Width){
+var Button = function(ctx,img,Xdraw,Ydraw,Height,Width){
 	var that = this;
 	this.xdraw = Xdraw;
 	this.ydraw = Ydraw;
 	this.w = Width;
 	this.h = Height;
-	this.parent = Parent;
-	this.ctx = parent.context;
+	//this.parent = Parent;
+	this.ctx = ctx;
 	
 	this.clicked = function(x,y){
 		return (x>=xdraw && x<xdraw+this.w && y>ydraw && y<ydraw+this.h);
@@ -47,11 +47,11 @@ var Button = function(Parent,img,Xdraw,Ydraw,Height,Width){
 		that.ctx.drawImage(img,Xdraw,Ydraw);
 	}
 }
-var Menu = function(Parent,BGimages,Music,Buttons,Labels,NextString){
+var Menu = function(ctx,BGimages,Music,Buttons,Labels,NextString){
 	var that = this;
-	this.parent = Parent;
+	//this.parent = Parent;
 	this.nextString = (NextString=='undefined') ? "END" : NextString ;
-	this.context = Parent.context;
+	this.context = ctx;
 	this.FPS = 60;
 	this.bgImages = BGimages;
 	this.buttons = Buttons;
