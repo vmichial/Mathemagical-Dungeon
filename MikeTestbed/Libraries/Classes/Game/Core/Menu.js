@@ -35,8 +35,8 @@ var Button = function(Parent,img,Xdraw,Ydraw,Height,Width){
 	this.ydraw = Ydraw;
 	this.w = Width;
 	this.h = Height;
-	this.mommy = Parent;
-	this.ctx = mommy.context;
+	this.parent = Parent;
+	this.ctx = parent.context;
 	
 	this.clicked = function(x,y){
 		return (x>=xdraw && x<xdraw+this.w && y>ydraw && y<ydraw+this.h);
@@ -47,7 +47,7 @@ var Button = function(Parent,img,Xdraw,Ydraw,Height,Width){
 	}
 }
 var Menu = function(Parent,BGimages,Music,Buttons,Labels,NextString){
-	
+	this.parent = Parent;
 	this.nextString = (NextString=='undefined') ? "END" : NextString ;
 	this.context = Parent.context;
 	this.FPS = 60;

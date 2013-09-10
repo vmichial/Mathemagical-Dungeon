@@ -25,56 +25,52 @@ function Level(TileString){
 TileArray = new Array();
 }
 
-function Scene(Type, PlayerData, coreSoundsArray, coreImagesArray, coreObjectsArray, Parent){
+function Scene(Type){
+	//this is set by the scene manager, and will hold a reference to said manager
+	this.parent;
 
 	var that = this;
     //defines the type of scene, a string with either, END,CUT,LEVEL,MENU
     this.type =Type;
     
     //the Level Object, check the structures to get a rundown on this(coming soon)
-    this.GameWorld = new Level();
+    this.GameWorld;
 
     //the Menu Object, check the structures to get a rundown on this(coming soon)
-    this.TheMenu = new Menu();
+    this.TheMenu;
 
     //The cutscene obeject,check the structures for more info
-    this.Cinematic = new CutScene();
-    
-	//core objects represent an array of all objects that come prebuilt into the game
-	//this includes blocks, traps, switches, trees, etc which are assigned to a tile
-	this.coreObjects = coreObjectsArray;
-
-	//custom objects are whatever objects you create for this specific scene.
-	this.customObjects = new Array();
+    this.Cinematic ;
 
     //coreSounds hold references to all of the core sounds everyone can have
-    this.coreSounds = coreSoundsArray;
+    this.coreSounds;
 
     //custom sounds hold references to all sounds unique to this particular scene.
     //custom sounds should be set in initialization by the creator of the scene
     this.customSounds = new Array();
 
     //coreImages hold references to all of the core images needed for the basic game
-    this.coreImages = coreImagesArray;
+    this.coreImages;
 
     //custom images hold references to all images unique to this particular scene.
     //custom images should be initialized by the creator of the scene
-    this.customImages = newArray();
+    this.customImages = new Array();
     
 	//initialize function will call the init of the correct type, and give a loading screen
 	//while you wait for assets to load
-	this.initilize();
+	this.init = function(){
+		this.coreSounds = parent.coreSounds;
+		this.coreImages = parent.coreImages;
 	
-	//set custom images lets you set the sources of each of your custom images causing the //page to start loading them, this function is called by init.
-	this.setCustomImages();
-
-	//set custom sounds lets you initialize the custom sounds array for the sounds your 
-	//scene needs, called by init
-	this.setCustomSounds();
+	}
+	this.initialize = function(){
+	
+	}
+	
 	
 	//draw will draw based on what the type is
-	this.draw() = function(Parent){
-		switch(Parent.type){
+	this.draw = function(){
+		switch(that.type){
 			case "END":{} break;
 			case "CUT":{} break;
 			case "LEVEL":{} break;
@@ -83,4 +79,13 @@ function Scene(Type, PlayerData, coreSoundsArray, coreImagesArray, coreObjectsAr
 		}
 	}
 
+	this.update = function(){
+		switch(that.type){
+			case "END":{} break;
+			case "CUT":{} break;
+			case "LEVEL":{} break;
+			case "MENU":{} break;
+			
+		}
+	}
 }

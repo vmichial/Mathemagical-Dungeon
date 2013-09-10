@@ -54,17 +54,21 @@ var SceneManager = function(can,con){
 	//by default the current scene is negative one, which is no scene
 	this.currentScene = -1;
 	this.lastScene = -1;
+	this.numScenes = 0;
 	
 	//this adds the scene to the array
 	this.addScene = function(scene){
 		this.setParent(scene);
-		this.scenes[numScenes] = scene;
+		this.scenes[this.numScenes++] = scene;
 	}
 	
 	this.findSceneByName = function(NAME){
 		if(this.scenes.length == 0){this.currentScene = -1; return;}
 		for( var i = 0; i<this.scenes.length; i++){
-			if(this.scenes[i].name == NAME){this.lastScene=this.currentScene; this.currentScene = i;return;}
+			if(this.scenes[i].name == NAME){
+				this.lastScene=this.currentScene; this.currentScene = i;
+				this.scenes[i].init(); return;
+			}
 		}
 		this.currentScene = 0;
 	}
@@ -81,8 +85,6 @@ var SceneManager = function(can,con){
 	//this array is forthe audio objects representing the core game
 	this.coreSounds = new Array();
 	this.soundsReady = new Array();//bools representing if they are ready
-		
-	this.coreObjects = new Array();
 	
 	//scenes have a right to change info in the manager, so set parent gives the scene a ref
 	this.setParent = function(scene){
@@ -93,32 +95,35 @@ var SceneManager = function(can,con){
 	//you should not be polling to know if a click happened,
 	//you should however do all click handling here. pass it off to the 
 	//scene. evt is an alias for the even object passed by javascript
-	this.clickHandler = function(evt){
+	var clickHandler = function(evt){
 		console.log("CLICK");
-		this.scenes[this.currentScene].clickHandler(evt);
+		that.scenes[that.currentScene].clickHandler(evt);
 	}
 	
 	// you also do not call key handler yourself. but instead
 	//structure your code so that when a key is pressed, you do 
 	//the work immediate
-	this.keyDownHandler = function(evt){
-		this.scenes[this.curentScene].keyDownHandler(evt);
+	var keyDownHandler = function(evt){
+		console.log("KeyDown");
+		that.scenes[that.curentScene].keyDownHandler(evt);
 	}
 	
-	//just as with the other even handlers, don't poll, just 
+	//just as with the other event handlers, don't poll, just 
 	//do the even handling upon receiving an even
-	this.keyUpHandler = function(evt){
-		this.scenes[this.currentScene].keyUpHandler(evt);
+	var keyUpHandler = function(evt){
+		console.log("keyUp");
+		that.scenes[that.currentScene].keyUpHandler(evt);
 	}
 	
 	this.playScenes = function(){
-		console.log(that.scenes)
-		that.Scenes[that.currentScene].update();
-		that.Scenes[that.currentScene].draw();
+		//console.log(that.scenes)
+		that.scenes[that.currentScene].update();
+		that.scenes[that.currentScene].draw();
 	}
 	
 	this.playGame = function(){
 		this.currentScene = 0;
+		this.scenes[this.currentScene].init();
 		gameLoop = setInterval(that.playScenes,1000,FPS);
 	}
 	
@@ -148,7 +153,7 @@ var SceneManager = function(can,con){
 		this.coreSounds[0] = new Audio("Assets/Sounds/Core/Music/Burn My Dread.mp3");
 		console.log(this.coreSounds[0]);
 		this.soundsReady[0] = false;
-		this.coreSounds[0].addEventListener('canplaythrough',function(){that.soundsReady[0] = true; that.coreSounds[0].play();},false);
+		this.coreSounds[0].addEventListener('canplaythrough',function(){that.soundsReady[0] = true;},false);
 		
 		for(var i = 0; i<this.coreImages[0].length ; i++){
 				this.imagesReady[i] = false;
@@ -190,8 +195,11 @@ var SceneManager = function(can,con){
 
 }
 var GameManager = new SceneManager(Canvas,context);
-GameManager.init();
+var aScene = new Scene("CUT");
 //the events we listen for are clicking down, pressing a key, and releasing a key
-Canvas.addEventListener('mousedown', GameManager.ClickHandler,false);
+Canvas.addEventListener('mousedown', GameManager.clickHandler,false);
 Canvas.addEventListener('keydown', GameManager.keyDownHandler, false);
 Canvas.addEventListener('keyup', GameManager.keyUpHandler, false);
+
+GameManager.addScene(aScene);
+GameManager.init();
