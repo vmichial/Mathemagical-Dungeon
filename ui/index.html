@@ -1,0 +1,199 @@
+<!DOCTYPE HTML>
+<head>
+	<title>UI Class Test</title>
+	<script src="UIManager.js"></script>
+	<style>
+		body {
+			background:url('2c_compressed.jpg');
+		}
+		#platform {
+			width:800px;
+			height:600px;
+			background: rgba(0,0,0,0.85);
+			position:absolute;
+			top:50%;left:50%;
+			margin-top:-380px;
+			margin-left:-480px;
+			padding:80px;
+			border-radius:20px;
+			overflow:hidden;
+			box-shadow:0 1px 20px rgba(0,0,0,0.8);
+			border-top:1px solid rgba(255,255,255,0.4);
+		}
+		#platform-content {
+			width:100%;
+			height:100%;
+			background:#ddd;
+			overflow:hidden;
+		}
+		#screen {
+			position:absolute;
+			top:80px;left:80px;
+			width:800px;
+			height:600px;
+			background:rgba(46,79,107,0.2);
+			box-shadow:0 2px 10px rgba(0,0,0,0.8) inset;
+			overflow:hidden;
+		}
+		.reflection {
+			background: -moz-linear-gradient(top,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 27%, rgba(255,255,255,0) 100%);
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0)), color-stop(27%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,0)));
+			background: -webkit-linear-gradient(top,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 27%,rgba(255,255,255,0) 100%);
+			background: -o-linear-gradient(top,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 27%,rgba(255,255,255,0) 100%);
+			background: -ms-linear-gradient(top,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 27%,rgba(255,255,255,0) 100%);
+			background: linear-gradient(to bottom,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 27%,rgba(255,255,255,0) 100%);
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#00ffffff',GradientType=0 );
+	
+			opacity:0.1;
+			
+			width:100px;
+			height:100%;
+			position:absolute;
+			top:0;left:20px;
+			-webkit-transform: skew(-30deg,0);
+		}
+		#reflect-1 { left:-60px; width:50px; }
+		#reflect-3 { left:810px; width:150px; }
+		#message {
+			position:absolute;
+			top:50%; left:50%;
+			margin-top:-20px; margin-left:-200px;
+			width:400px;
+			height:40px;
+			text-align:center;
+			line-height:40px;
+			background:rgba(0,0,0,0.6);
+			box-shadow:0 0 5px 0 rgba(0,0,0,0.5);
+			color:#ccc;
+			font-family:'Monaco',monospace;
+			display:none;
+		}
+	</style>
+	<script>
+		var mode = 'default';
+		var dataTypes=['hp','am','sm','mm','dm'];
+		var dataMemberNames=['hp','add','sub','mul','div'];
+		
+		var spellTypes = ['addition','subtraction','multiplication','division'];
+		var Player = {
+			'hp':12,
+			'mp':{
+				'add':14,
+				'sub':11,
+				'mul':34,
+				'div':23
+			}
+		}
+		var spells = {
+			'addition':['Add Spell #1','Add Spell #2','Add Spell #3'],
+			'subtraction':['Sub Spell #1','Sub Spell #2'],
+			'multiplication':['Mult Spell #1','Mult Spell #2','Mult Spell #3'/* ,'Mult Spell #4','Mult Spell #5','Mult Spell #6' */],
+			'division':['Div Spell #1','Div Spell #2','Div Spell #3']
+		}
+		var spellList = ['Add Spell #1','Add Spell #2','Add Spell #3','Sub Spell #1','Sub Spell #2','Mult Spell #1','Mult Spell #2','Mult Spell #3','Div Spell #1','Div Spell #2','Div Spell #3']
+		//available spells
+		var availableSpells = {
+			'addition':['Add Spell #1','Add Spell #2'],
+			'subtraction':['Sub Spell #1','Sub Spell #2'],
+			'multiplication':['Mult Spell #1'],
+		}
+		
+		var spellSelected = ['addition','Add Spell #1'];
+		var UI;
+		window.onload = function(){
+			UI = new UIManager(); //instantiate 
+			setInterval(function(){
+				//Randomize user data
+				Player = {
+					'hp':Math.floor(Math.random()*(100-0+1)+0),
+					'mp':{
+						'add':Math.floor(Math.random()*(100-0+1)+0),
+						'sub':Math.floor(Math.random()*(100-0+1)+0),
+						'mul':Math.floor(Math.random()*(100-0+1)+0),
+						'div':Math.floor(Math.random()*(100-0+1)+0)
+					}
+				}
+				UI.draw();
+			},1000);
+		}
+		
+		function parseKey(e){
+			var key = (e.keyCode ? e.keyCode : e.which);
+			//Switch in and out of modes
+			if(mode == 'spellMenu' && key == 69){ //e
+				mode = 'default';
+				UI.draw();
+			}
+			else if(mode != 'spellMenu' && key == 69) mode = 'spellMenu';
+			else if(key == 27){ //Esc
+				mode = 'default';
+				UI.draw();
+			} 
+	
+			if(mode == 'spellMenu'){
+				selectSpell(key);
+			}
+		}
+		function selectSpell(key){
+			//select spell press space, print spellname, close menu
+			var currentType = spellSelected[0];
+			var currentTypeIndex = spellTypes.indexOf(currentType);
+			var currentSpell = spellSelected[1];
+			var currentSpellIndex = availableSpells[spellTypes[currentTypeIndex]].indexOf(currentSpell);
+			
+			var newTypeIndex = currentTypeIndex;
+			var newSpellIndex = currentSpellIndex;
+			if(key == 39){ //Right arrow
+				newTypeIndex++;
+				newSpellIndex = 0;
+			}
+			else if(key == 37){ //left arrow
+				newTypeIndex--;
+				newSpellIndex = 0;
+			}
+			else if(key == 38){ //up arrow
+				newSpellIndex--;
+			}
+			else if(key == 40){ //down arrow
+				newSpellIndex++;
+			}
+			else if(key == 32){ //space bar
+				var spellID = spellList.indexOf(spellSelected[1]);
+				//Player.cast(spellID);
+				displayMessage("Cast spell #"+spellID); //Placeholder for creating the spell object
+				
+				//Close the menu
+				mode = 'default';
+				UI.draw();
+			}
+			
+			if(newTypeIndex >= Object.keys(availableSpells).length || newTypeIndex < 0 || newSpellIndex >= availableSpells[spellTypes[newTypeIndex]].length || newSpellIndex < 0) return;
+			
+			spellSelected = [spellTypes[newTypeIndex],availableSpells[spellTypes[newTypeIndex]][newSpellIndex]];
+			UI.draw();
+		}
+		function displayMessage(message){
+			var messageWindow = document.getElementById('message');
+			messageWindow.innerHTML = message;
+			messageWindow.style.display = 'block';
+			setTimeout(function(){messageWindow.style.display = 'none'},1500);
+		}
+	</script>
+	
+</head>
+<body onkeyup="parseKey(event);">
+	<div id="platform">
+		<div id="platform-content">
+			<canvas id="canvas"></canvas>
+		</div>
+		
+		<div id="screen">
+		</div>
+		<div class="reflection" id="reflect-1"></div>
+		<div class="reflection" id="reflect-2"></div>
+		<div class="reflection" id="reflect-3"></div>
+		
+		<div id="message"></div>
+	</div>
+</body>
+</html>
