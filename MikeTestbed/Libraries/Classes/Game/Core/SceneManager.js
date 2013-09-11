@@ -198,8 +198,8 @@ var GameManager = new SceneManager(Canvas,context);
 var aScene = new Scene("CUT");
 //the events we listen for are clicking down, pressing a key, and releasing a key
 Canvas.addEventListener('mousedown', GameManager.clickHandler,false);
-Canvas.addEventListener('keydown', GameManager.keyDownHandler, false);
-Canvas.addEventListener('keyup', GameManager.keyUpHandler, false);
+window.addEventListener('keydown', GameManager.keyDownHandler, false);
+window.addEventListener('keyup', GameManager.keyUpHandler, false);
 
 GameManager.addScene(aScene);
 GameManager.init();
