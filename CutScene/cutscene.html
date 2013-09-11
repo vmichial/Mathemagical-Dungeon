@@ -1,4 +1,4 @@
-<DOCTYPE hmtl>
+<DOCTYPE html>
 <html>
 	<head>
 		<meta charset="UTF-8"></meta>
@@ -7,8 +7,9 @@
 		<canvas id="myCanvas" width=1024 height=768></canvas>
 		<script type="text/javascript">
 			var canvas = document.getElementById("myCanvas");
-			canvas.addEventListener('mousedown', ,false);
-			var Direction = function(X,&){
+			var ctx = canvas.getContext("2d");
+			//canvas.addEventListener('mousedown', ,false);
+			var Direction = function(X,Y){
 				this.x = X;
 				this.y = Y;
 			}
@@ -24,7 +25,7 @@
 			topRight.x=1;
 			topRight.y=-1;
 			
-			var Cut = function(IMAGE,Duration,diretion,Start,Target){
+			var Cut = function(IMAGE,Duration,direction,Start,Target){
 				this.image = new Image();
 				this.direct = direction
 				this.duration = Duration;
@@ -34,20 +35,20 @@
 			
 			var ims = new Array();
 			ims[0] = new Image();
-			im1.src = "BG1.jjpg";
+			ims[0].src = "BG1.jpg";
 			ims[1] = new Image();
-			im2.src = "BG2.jpg";
+			ims[1].src = "BG2.jpg";
 			ims[2] = new Image();
-			im3.src = "BG3.jpg";
+			ims[2].src = "BG3.jpg";
 			
 			
 			var CUTS = new Array();
-			CUTS[0] = new Cut(CUTS[0],3,new Direction(1,0), new Start(100,100), new Target(1000,1000));
-			CUTS[1] = new Cut(CUTS[1],2,new Direction(1,1), new Start (300,400),new Target(500,500);
-			CUTS[2] = new Cut(CUTS[2],7,new Direction(-1,0),new Start(700,800),new Target(0,0);
+			CUTS[0] = new Cut(ims[0],3,new Direction(1,0), new Start(100,100), new Target(1000,1000));
+			CUTS[1] = new Cut(ims[1],2,new Direction(1,1), new Start (300,400),new Target(500,500));
+			CUTS[2] = new Cut(ims[2],7,new Direction(-1,0), new Start(700,800), new Target(0,0));
 			
-			var Cutscene = function(Cuts){
-				var that = this;
+			var cutScene = function(Cuts){
+				//var that = this;
 				this.cuts = Cuts;
 				this.currentCut = 0;
 				this.timer = 0;
@@ -56,31 +57,46 @@
 				this.y = 0;
 				
 				this.update = function(){
+				console.log("YO DAWG");
+				//update will perform the timed movements of the panning
 					this.timer++;
 					
-					if(timer / (that.cuts[that.currentCut].duration){
+					if(this.timer >= (60*(this.cuts[this.currentCut].duration))){
 						this.currentCut++;
 						this.timer = 0;
-						this.X = 0;
+						this.x = 0;
 						this.y = 0;
+						console.log("TIMES UP");
 					
 					}
 					else{
-						if(){
-								this.x+= this.speed*(this.cuts[this.currentCut].direct.x;
-								this.y+= this.speed*(this.cuts[this.currentCut].direct.y;
+						console.log("MOVE");
+						if(this.x < this.cuts[this.currentCut].target.x){
+								this.x+= this.speed*(this.cuts[this.currentCut].direct.x);
+								console.log("XMOVE");
 							}
-							else{
-							
+						if(this.y < this.cuts[this.currentCut].target.y){
+								this.y+= this.speed*(this.cuts[this.currentCut].direct.y);
+								console.log("YMOVE");
 							}
 					}
+					
+					
 				
 				}
 				
 				this.draw = function(){
-					
+					ctx.clearRect(0,0,canvas.width, canvas.height);
+					console.log("Draw time!");
+					ctx.drawImage(this.cuts[this.currentCut].image,-(this.cuts[this.currentCut].start.x),-(this.cuts[this.currentCut].start.y) );
+					console.log("AFTER DRAW!!!");
 				}
 			}
+			var mycut = new cutScene(CUTS);
+			
+			var repeat = new function(){mycut.update(); mycut.draw();}
+			
+			var loop = setInterval(repeat,1000/60);
 		</script>
 	</body>
 </html>
