@@ -17,41 +17,44 @@ var Label = function(Parent, Text, fontSize, IMG, TextX,TextY,ImX,ImY){
 	this.font = ""+fontSize+"px Arial";
 	
 	this.draw = function(){
-		if(that.text!='undefined'){
+		if(that.text){
 			Parent.context.font = font;
 			Parent.context.fillText(Text,textX,textY);
 		}
-		if(that.img != 'undefined'){
+		if(that.img){
 			Parent.context.drawImage(img,imX,imY);
 		}
-		if(that.text=='undefined' && that.img=='undefined'){
+		if(!that.text&& !that.img){
 			console.log("EHRMEGERD YOU PASSED NO IMAGE OR TEXT TO THE LABEL!");
 		}
 	}
 }
-
-var Button = function(ctx,img,Xdraw,Ydraw,Height,Width){
+//Creates a clickable button object with its parents, image object, draw x and y, width and height
+//Added new parameter to be the sceneName of the next scene when button is clicked
+var Button = function(Parent,img,Xdraw,Ydraw,Width, Height, NextString){
 	var that = this;
 	this.xdraw = Xdraw;
 	this.ydraw = Ydraw;
 	this.w = Width;
 	this.h = Height;
-	//this.parent = Parent;
-	this.ctx = ctx;
+	this.parent = Parent;
+	this.ctx = Parent.context;
+	this.nextString = NextString;
 	
 	this.clicked = function(x,y){
-		return (x>=xdraw && x<xdraw+this.w && y>ydraw && y<ydraw+this.h);
+		return (x>=that.xdraw && x<(that.xdraw+that.w) && y>that.ydraw && y<(that.ydraw+that.h));
 	}
 	
 	this.draw = function(){
-		that.ctx.drawImage(img,Xdraw,Ydraw);
+		that.ctx.drawImage(img,Xdraw,Ydraw, that.w, that.h);
 	}
 }
-var Menu = function(ctx,BGimages,Music,Buttons,Labels,NextString){
+//Creates a menu object when its parent, background image, music object, array of buttons and lables and name of next scene
+var Menu = function(Parent,BGimages,Music,Buttons,Labels,NextString){
 	var that = this;
-	//this.parent = Parent;
-	this.nextString = (NextString=='undefined') ? "END" : NextString ;
-	this.context = ctx;
+	this.parent = Parent;
+	this.nextString = (!NextString) ? "END" : NextString ;
+	this.context = Parent.context;
 	this.FPS = 60;
 	this.bgImages = BGimages;
 	this.buttons = Buttons;
@@ -59,28 +62,45 @@ var Menu = function(ctx,BGimages,Music,Buttons,Labels,NextString){
 	this.music = Music;
 	
 	this.init = function() {
-		if (that.music != 'undefined') {
+		if (that.music) {
 			that.music.play();
 		}
 		
 	}
 	
 	this.draw = function() {
-		if (that.bgImages != 'undefined') {
+		if (that.bgImages) {
 			that.context.drawImage(that.bgImages, 0, 0, 1024, 768);
 		}
-		if (that.buttons != 'undefined') {
-			for(int i = 0; i < that.buttons.length; i++) {
+		if (that.buttons) {
+			for(var i = 0; i < that.buttons.length; i++) {
 				var button = that.buttons[i];
 				button.draw();
 			}
 		}
-		if (that.labels != 'undefined') {
-			for (int i = 0; i < that.labels.length; i++) {
+		if (that.labels) {
+			for (var i = 0; i < that.labels.length; i++) {
 				var label = that.labels[i];
 				label.draw();
 			}
 		}
 	}
 	
+	this.clickHandler = function(evt) {
+		var x = evt.offsetX;
+		var y = evt.offsetY;
+		for(var i = 0; i < that.buttons.length; i++) {
+			var button = that.buttons[i];
+			if(button.clicked(x, y)) {
+				console.log("button " + i + " clicked");
+			}
+		}
+	
+	}
+	
+	this.keyDownHandler = function(evt) {
+		if(evt.which == 27) {
+			console.log("esc pressed");
+		}
+	}
 }
