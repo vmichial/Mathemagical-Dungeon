@@ -1,4 +1,4 @@
-var test = function() {
+
 	var img1 = new Image();
 	var img2 = new Image();
 	var bgImg = new Image();
@@ -12,18 +12,13 @@ var test = function() {
 	var canvas = document.getElementById("canvas");
 	var ctx = canvas.getContext('2d');
 	
-	var button1 = new Button(ctx, img1, 0, 0, 427, 95);
-	var button2 = new Button(ctx, img2, 0, canvas.height/2, 427, 95);
+	var button1 = new Button(ctx, img1, 0, canvas.height/2, 200, 100);
+	var button2 = new Button(ctx, img2, canvas.width/2, canvas.height/2, 200, 100);
 	var buttons = new Array(button1, button2);
 	var menu = new Menu(ctx, bgImg, music, buttons);
 	menu.init();
-	menu.draw();
+	canvas.addEventListener("mousedown", menu.clickHandler, false);
+	window.addEventListener("keydown", menu.keyDownHandler, false);
+	var loop = setInterval(menu.draw, 1000/60);
 	
-	
-	
 
-
-
-
-
-}
